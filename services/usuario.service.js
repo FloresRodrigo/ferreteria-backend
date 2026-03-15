@@ -40,6 +40,12 @@ class UsuarioService {
         if(!id) {
             throw new Error('Debe ingresar un ID');
         };
+        nombre_completo = nombre_completo?.trim();
+        username = username?.trim();
+        email = email?.trim();
+        if(!nombre_completo && !username && !email) {
+            throw new Error('Ingrese al menos un campo');
+        };
         const usuario = await Usuario.findById(id);
         if(!usuario) {
             throw new Error('No se encontro un usuario con ese ID');
@@ -61,29 +67,28 @@ class UsuarioService {
             if(!/^[A-Za-z0-9]+$/.test(username)) {
                 throw new Error('El username solo puede tener letras y numeros');
             };
-            const usernameExists = await Usuario.findOne({ username: username, _id: { $ne: id } });
+            const usernameMinuscula = username?.toLowerCase();
+            const usernameExists = await Usuario.findOne({ username: usernameMinuscula, _id: { $ne: id } });
             if(usernameExists) {
                 throw new Error('Username ya registrado');
             };
-            usuario.username = username;
+            usuario.username = usernameMinuscula;
         };
         //Actualizar email
         let emailChanged = false;
         let oldEmail;
-        if(email && email !== usuario.email) {
-            if(!/.+\@.+\..+/.test(email)) {
+        const emailMinuscula = email?.toLowerCase();
+        if(emailMinuscula && emailMinuscula !== usuario.email) {
+            if(!/.+\@.+\..+/.test(emailMinuscula)) {
                 throw new Error('Formato de email invalido');
             };
-            const emailExists = await Usuario.findOne({ email: email, _id: { $ne: id } });
+            const emailExists = await Usuario.findOne({ email: emailMinuscula, _id: { $ne: id } });
             if(emailExists) {
                 throw new Error('Email ya registrado');
             };
             oldEmail = usuario.email;
-            usuario.email = email;
+            usuario.email = emailMinuscula;
             emailChanged = true;
-        };
-        if(!nombre_completo && !username && !email) {
-            throw new Error('Ingrese al menos un campo');
         };
         await usuario.save();
         //Enviar solo si se cambio email y actualizo correctamente
@@ -108,6 +113,7 @@ class UsuarioService {
         if(!usuario) {
             throw new Error('No se encontro un usuario con ese ID');
         };
+        newPassword = newPassword?.trim();
         //Validar que lleguen datos
         if(!actualPassword || !newPassword || !repeatNewPassword) {
             throw new Error('Debe completar todos los campos');
@@ -155,6 +161,10 @@ class UsuarioService {
         if(!usuario) {
             throw new Error('No se encontro un usuario con ese ID');
         };
+        nombre_completo = nombre_completo?.trim();
+        username = username?.trim();
+        email = email?.trim();
+        password = password?.trim();
         if(!nombre_completo && !username && !email && !password && !estado) {
             throw new Error('Ingrese al menos un campo');
         };
@@ -173,25 +183,27 @@ class UsuarioService {
             if(!/^[A-Za-z0-9]+$/.test(username)) {
                 throw new Error('El username solo puede tener letras y numeros');
             };
-            const usernameExists = await Usuario.findOne({ username: username, _id: { $ne: id } });
+            const usernameMinuscula = username?.toLowerCase();
+            const usernameExists = await Usuario.findOne({ username: usernameMinuscula, _id: { $ne: id } });
             if(usernameExists) {
                 throw new Error('Username ya registrado');
             };
-            usuario.username = username;
+            usuario.username = usernameMinuscula;
         };
         //Modificar email solo si llega
         let oldEmail;
         let emailChanged = false;
-        if(email && email !== usuario.email) {
-            if(!/.+\@.+\..+/.test(email)) {
+        const emailMinuscula = email?.toLowerCase();
+        if(emailMinuscula && emailMinuscula !== usuario.email) {
+            if(!/.+\@.+\..+/.test(emailMinuscula)) {
                 throw new Error('Formato de email invalido');
             };
-            const emailExists = await Usuario.findOne({ email: email, _id: { $ne: id } });
+            const emailExists = await Usuario.findOne({ email: emailMinuscula, _id: { $ne: id } });
             if(emailExists) {
                 throw new Error('Email ya registrado');
             };
             oldEmail = usuario.email;
-            usuario.email = email;
+            usuario.email = emailMinuscula;
             emailChanged = true;
         };
         //Cambiar contraseña solo si llega

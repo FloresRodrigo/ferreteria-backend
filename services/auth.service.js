@@ -11,6 +11,10 @@ class AuthService {
     //METODO PARA REGISTRAR
     async register({ nombre_completo, username, email, password }) {
         //VALIDACIONES
+        nombre_completo = nombre_completo?.trim();
+        username = username?.trim();
+        email = email?.trim();
+        password = password?.trim();
         //Validar que lleguen datos
         if(!nombre_completo || !username || !email || !password) {
             throw new Error('Datos invalidos'); 
@@ -34,9 +38,11 @@ class AuthService {
         if(!/.+\@.+\..+/.test(email)) {
             throw new Error('Formato de email invalido');
         };
+        const usernameMinuscula = username.toLowerCase();
+        const emailMinuscula = email.toLowerCase();
         //Validar que no esten ocupados el username o el email
-        const usernameExists = await Usuario.findOne({ username: username });
-        const emailExists = await Usuario.findOne({ email: email });
+        const usernameExists = await Usuario.findOne({ username: usernameMinuscula });
+        const emailExists = await Usuario.findOne({ email: emailMinuscula });
         if(usernameExists) {
             throw new Error('Username ya registrado');
         };
@@ -47,8 +53,8 @@ class AuthService {
         const hashedPassword = await bcrypt.hash(password, 10);
         const usuario = await Usuario.create({
             nombre_completo: nombre_completo,
-            username: username,
-            email: email,
+            username: usernameMinuscula,
+            email: emailMinuscula,
             password: hashedPassword
         });
         //Envio de email de registro
@@ -199,7 +205,8 @@ class AuthService {
         //Guardar el nombre y el email del payload
         const { name, email } = ticket.getPayload();
         //Verificar si el email ya esta registrado en el sitio
-        let usuario = await Usuario.findOne({ email: email });
+        const emailMinuscula = email.trim().toLowerCase();
+        let usuario = await Usuario.findOne({ email: emailMinuscula });
         //Si no esta registrado, este se crea
         if(!usuario) {
             //Genera un username unico en caso que dos correos choquen
@@ -207,7 +214,7 @@ class AuthService {
             usuario = await Usuario.create({
                 nombre_completo: name,
                 username: usernameUnico,
-                email: email,
+                email: emailMinuscula,
                 isGoogle: true
             });
             //Enviar email al registrarse
@@ -252,6 +259,7 @@ class AuthService {
     //METODO PARA ESTABLECER CONTRASEÑA A CUENTA CREADA CON GOOGLE
     async setPasswordGoogle( id, { password }) {
         //Se valida la contraseña
+        password = password?.trim();
         if(!password || password.length < 8 || password.length > 20) {
             throw new Error('Contraseña invalida');
         };

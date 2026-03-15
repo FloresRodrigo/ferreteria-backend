@@ -5,6 +5,10 @@ class ArticuloService {
     //METODO PARA CREAR UN ARTICULO
     async createArticulo({ nombre, descripcion, imagen, precio, stock }) {
         //Validar que lleguen todos los datos
+        nombre = nombre?.trim();
+        descripcion = descripcion?.trim();
+        precio = precio !== undefined && precio !== null ? Number(precio) : precio;
+        stock = stock !== undefined && stock !== null ? Number(stock) : stock;
         if(!nombre || !descripcion || precio === undefined || precio === null || stock === undefined || stock === null) {
             throw new Error('Debe ingresar todos los campos');
         };
@@ -13,17 +17,17 @@ class ArticuloService {
         };
         //VALIDACIONES
         //Validar longitudes
-        if(nombre.length < 8 || nombre.length > 40) {
-            throw new Error('El nombre del articulo debe tener entre 8 y 40 caracteres');
+        if(nombre.length < 3 || nombre.length > 40) {
+            throw new Error('El nombre del articulo debe tener entre 3 y 40 caracteres');
         };
         if(descripcion.length < 10 || descripcion.length > 200) {
             throw new Error('La descripcion del articulo debe tener entre 10 y 200 caracteres');
         };
         //Validar valor
-        if(precio < 0) {
+        if(typeof precio !== 'number' || precio < 0) {
             throw new Error('El precio no puede ser negativo');
         };
-        if(stock < 0) {
+        if(typeof stock !== 'number' || stock < 0) {
             throw new Error('El stock no puede ser negativo');
         };
         //Se sube solo la imagen al final
@@ -222,13 +226,17 @@ class ArticuloService {
 
     //METODO PARA ACTUALIZAR UN ARTICULO
     async updateArticulo(id, { nombre, descripcion, precio, stock, estado }, imagen) {
-        //Validar datos
-        if(!nombre && !descripcion && (precio === undefined || precio === null) && (stock === undefined || stock === null) && !estado && !imagen) {
-            throw new Error('Ingrese al menos un campo para actualizar');
-        };
         //Verificar ID
         if(!id) {
             throw new Error('ID invalido');
+        };
+        //Validar datos
+        nombre = nombre?.trim();
+        descripcion = descripcion?.trim();
+        precio = precio !== undefined && precio !== null ? Number(precio) : precio;
+        stock = stock !== undefined && stock !== null ? Number(stock) : stock;
+        if(!nombre && !descripcion && (precio === undefined || precio === null) && (stock === undefined || stock === null) && !estado && !imagen) {
+            throw new Error('Ingrese al menos un campo para actualizar');
         };
         //Verificar articulo a editar
         const articulo = await Articulo.findById(id);
@@ -238,8 +246,8 @@ class ArticuloService {
         //VALIDACIONES
         //Validar longitudes
         if(nombre) {
-            if(nombre.length < 8 || nombre.length > 40) {
-                throw new Error('El nombre del articulo debe tener entre 8 y 40 caracteres');
+            if(nombre.length < 3 || nombre.length > 40) {
+                throw new Error('El nombre del articulo debe tener entre 3 y 40 caracteres');
             };
             articulo.nombre = nombre;
         };
@@ -251,13 +259,13 @@ class ArticuloService {
         };
         //Validar valores de precio y stock
         if(precio !== undefined && precio !== null) {
-            if(precio < 0) {
+            if(typeof precio !== 'number' || precio < 0) {
                 throw new Error('El precio no puede ser negativo');
             };
             articulo.precio = precio;
         };
         if(stock !== undefined && stock !== null) {
-            if(stock < 0) {
+            if(typeof stock !== 'number' || stock < 0) {
                 throw new Error('El stock no puede ser negativo');
             };
             articulo.stock = stock;
